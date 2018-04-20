@@ -5,14 +5,20 @@
  */
 package wrp.kafkaconsumer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import wrp.kafkaconsumer.models.ModelBitacora;
+import wrp.kafkaconsumer.utils.UtilsDB;
 import wrp.kafkaconsumer.utils.UtilsGeneral;
 
 /**
@@ -33,12 +39,12 @@ public class MyConsumer {
         Properties props = new Properties();
         //set the props to the object
         setProps(args, props);
+        UtilsDB.initDatabase(props);
         //the number of instances should be provided in the args[1] position
         try {
             int numberOfInstances = Integer.parseInt(args[1]);
             runIntances(numberOfInstances, props);
         } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-            e.printStackTrace();
             System.out.println("The number of instances was not specified, running one instance...");
             runInstance(props);
         }
@@ -57,8 +63,15 @@ public class MyConsumer {
                     new KafkaConsumer<>(props),
                     Arrays.asList(props.get("topic").toString()),
                     records -> {
+                        ObjectMapper mapper = new ObjectMapper();
                         for (ConsumerRecord<String, String> record : records) {
-                            System.out.printf("thread = " + Thread.currentThread().getName() + " offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
+                            try {
+                                ModelBitacora mb = mapper.readValue(Base64.getDecoder().decode(record.value()), ModelBitacora.class);
+                                UtilsDB.insert(mb);
+                            } catch (IOException ex) {
+                                Logger.getLogger(MyConsumer.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            //System.out.printf("thread = " + Thread.currentThread().getName() + " offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
                         }
                     });
             new Thread(kafkaRunner, "T" + (i + 1)).start();
@@ -74,11 +87,18 @@ public class MyConsumer {
     public static void runInstance(final Properties props) {
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Arrays.asList(props.get("topic").toString()));
+        ObjectMapper mapper = new ObjectMapper();
         //run indefinitely
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(100);
             for (ConsumerRecord<String, String> record : records) {
-                System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
+                try {
+                    ModelBitacora mb = mapper.readValue(Base64.getDecoder().decode(record.value()), ModelBitacora.class);
+                    UtilsDB.insert(mb);
+                } catch (IOException ex) {
+                    Logger.getLogger(MyConsumer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+//                System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
             }
         }
     }
@@ -102,6 +122,9 @@ public class MyConsumer {
             props.put("auto.commit.interval.ms", "1000");
             props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
             props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+            props.put("mongodb.connection", "localhost:27017");
+            props.put("mongodb.database", "bitacora");
+
             System.out.println("Consumer(s) will run with default configs:");
         }
         UtilsGeneral.printProps(props);

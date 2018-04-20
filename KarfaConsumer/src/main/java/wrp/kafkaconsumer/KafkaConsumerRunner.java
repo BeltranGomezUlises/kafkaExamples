@@ -13,6 +13,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
 
 /**
+ * Generic Kafka consumer to run in parallel with a pool of independent consumers
  *
  * @author Ulises Beltrán Gómez --- beltrangomezulises@gmail.com, at 11/04/2018
  */
@@ -22,7 +23,7 @@ public class KafkaConsumerRunner implements Runnable {
     private final KafkaConsumer consumer;
     private final List<String> topics;
     private final Consumer function;
-    
+
     public KafkaConsumerRunner(KafkaConsumer consumer, List<String> topics, Consumer<ConsumerRecords<String, String>> function) {
         this.consumer = consumer;
         this.topics = topics;
@@ -52,6 +53,5 @@ public class KafkaConsumerRunner implements Runnable {
         closed.set(true);
         consumer.wakeup();
     }
-    
-    
+
 }

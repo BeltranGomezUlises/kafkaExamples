@@ -29,7 +29,7 @@ public class MyProducer {
 
         Producer<String, String> producer = new KafkaProducer<>(props);
         for (int i = 0; i < 1000; i++) {
-            producer.send(new ProducerRecord<>("topic.test", Integer.toString(i), Integer.toString(i)));
+            producer.send(new ProducerRecord<>("topic.test", Integer.toString(i), "eyJ1c3VhcmlvSWQiOiIyIiwiZmVjaGEiOiIyMDE4LTAzLTAxVDA2OjAwOjAwLjAwMFoiLCJhY2Npb24iOiJhY2Npb24gMSIsImlwQ2xpZW50ZSI6IjE5Mi4xNjguMTIuNDUiLCJzaXN0ZW1hT3AiOiJMaW51eCAzLjE0LjEyIiwiZGF0YSI6eyJrMSI6InYxIiwiazIiOiJ2MiIsImszIjoidjMifX0="));
         }
 //        ExecutorService executor = Executors.newFixedThreadPool(2);
 //        Thread t1 = new Thread(() -> {
