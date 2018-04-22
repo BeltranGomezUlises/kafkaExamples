@@ -35,7 +35,6 @@ public class ConsumerJournal implements Consumer<ConsumerRecords<String, String>
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
             //System.out.printf("thread = " + Thread.currentThread().getName() + " offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
-            //System.out.printf("thread = " + Thread.currentThread().getName() + " offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
         }
     }
 

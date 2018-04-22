@@ -12,6 +12,7 @@ import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.mail.EmailException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import wrp.kafkaconsumer.Main;
@@ -53,6 +54,8 @@ public class ConsumerAudit implements Consumer<ConsumerRecords<String, String>> 
                 UtilsDB.insertAudit(ma);
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (EmailException ex) {
+                Logger.getLogger(ConsumerAudit.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
