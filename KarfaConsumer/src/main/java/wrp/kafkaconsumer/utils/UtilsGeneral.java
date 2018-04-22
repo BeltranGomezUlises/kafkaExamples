@@ -10,7 +10,7 @@ import java.util.Properties;
 
 /**
  *
- * @author Ulises Beltrán Gómez --- beltrangomezulises@gmail.com, at 16/04/2018
+ * @author Alonso --- alongo@kriblet.com at 16/04/2018
  */
 public class UtilsGeneral {
 

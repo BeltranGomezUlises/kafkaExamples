@@ -8,6 +8,8 @@ package wrp.kafkaconsumer.utils;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import java.util.List;
@@ -17,11 +19,12 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.mongojack.JacksonCodecRegistry;
-import wrp.kafkaconsumer.models.ModelBitacora;
+import wrp.kafkaconsumer.models.ModelAudit;
+import wrp.kafkaconsumer.models.ModelJournal;
 
 /**
  *
- * @author Ulises Beltrán Gómez --- beltrangomezulises@gmail.com, at 12/03/2018
+ * @author Alonso --- alongo@kriblet.com
  */
 public class UtilsDB {
 
@@ -34,7 +37,8 @@ public class UtilsDB {
     private static MongoClientURI mongoClientUri;
     private static MongoClient mongoClient;
     private static MongoDatabase DB;
-    private static MongoCollection<ModelBitacora> collBitacora;
+    private static MongoCollection<ModelJournal> collectionJournal;
+    private static MongoCollection<ModelAudit> collectionAudit;
 
     /**
      * Initialize the database client pool and codecs configs
@@ -44,24 +48,40 @@ public class UtilsDB {
     public static void initDatabase(Properties props) {
         CodecRegistry pojoCodecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),
                 fromProviders(PojoCodecProvider.builder().automatic(true).build()));
-        mongoClient = new MongoClient(props.getProperty("mongodb.connection"), MongoClientOptions.builder().codecRegistry(pojoCodecRegistry).build());
+
+        MongoCredential cre = MongoCredential.createCredential(
+                props.getProperty("mongodb.user"),
+                props.getProperty("mongodb.loginDatabase"),
+                props.getProperty("mongodb.pass").toCharArray());
+
+        mongoClient = new MongoClient(
+                new ServerAddress(
+                        props.getProperty("mongodb.host"),
+                        Integer.valueOf(props.getProperty("mongodb.port"))),
+                cre,
+                MongoClientOptions.builder().codecRegistry(pojoCodecRegistry).build());
+
         DB = mongoClient.getDatabase(props.getProperty("mongodb.database"));
 
         JacksonCodecRegistry jacksonCodecRegistry = new JacksonCodecRegistry();
-        jacksonCodecRegistry.addCodecForClass(ModelBitacora.class);
+        jacksonCodecRegistry.addCodecForClass(ModelJournal.class);
+        jacksonCodecRegistry.addCodecForClass(ModelAudit.class);
 
-        MongoCollection<?> coll = DB.getCollection("bitacora");
-        collBitacora = coll.withDocumentClass(ModelBitacora.class).withCodecRegistry(jacksonCodecRegistry);
+        MongoCollection<?> collJournal = DB.getCollection("journal");
+        collectionJournal = collJournal.withDocumentClass(ModelJournal.class).withCodecRegistry(jacksonCodecRegistry);
+
+        MongoCollection<?> collAudit = DB.getCollection("audit");
+        collectionAudit = collAudit.withDocumentClass(ModelAudit.class).withCodecRegistry(jacksonCodecRegistry);
     }
 
     /**
      * Saves in the mongo database the object
      *
-     * @param bitacora object to save in database
+     * @param journal object to save in database
      */
-    public static void insert(ModelBitacora bitacora) {
+    public static void insertJournal(ModelJournal journal) {
         try {
-            collBitacora.insertOne(bitacora);
+            collectionJournal.insertOne(journal);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,13 +90,40 @@ public class UtilsDB {
     /**
      * Saves in the mongo database all the object
      *
-     * @param bitacoras objects to save in database
+     * @param journals objects to save in database
      */
-    public static void insert(List<ModelBitacora> bitacoras) {
+    public static void insertJournals(List<ModelJournal> journals) {
         try {
-            collBitacora.insertMany(bitacoras);
+            collectionJournal.insertMany(journals);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Saves in the mongo database the object
+     *
+     * @param audit object to sabe in database
+     */
+    public static void insertAudit(ModelAudit audit) {
+        try {
+            collectionAudit.insertOne(audit);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Saves in the mongo database the object
+     *
+     * @param audits object to sabe in database
+     */
+    public static void insertAudits(List<ModelAudit> audits) {
+        try {
+            collectionAudit.insertMany(audits);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

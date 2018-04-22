@@ -12,13 +12,13 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 /**
  *
- * @author Ulises Beltrán Gómez --- beltrangomezulises@gmail.com, at 11/04/2018
+ * @author Alonso --- alongo@kriblet.com
  */
 public class MyProducer {
 
     public static void main(String[] args) {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
+        props.put("bootstrap.servers", "192.168.1.70:9092");
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("batch.size", 16384);
@@ -27,31 +27,12 @@ public class MyProducer {
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
-        Producer<String, String> producer = new KafkaProducer<>(props);
-        for (int i = 0; i < 1000; i++) {
-            producer.send(new ProducerRecord<>("topic.test", Integer.toString(i), "eyJ1c3VhcmlvSWQiOiIyIiwiZmVjaGEiOiIyMDE4LTAzLTAxVDA2OjAwOjAwLjAwMFoiLCJhY2Npb24iOiJhY2Npb24gMSIsImlwQ2xpZW50ZSI6IjE5Mi4xNjguMTIuNDUiLCJzaXN0ZW1hT3AiOiJMaW51eCAzLjE0LjEyIiwiZGF0YSI6eyJrMSI6InYxIiwiazIiOiJ2MiIsImszIjoidjMifX0="));
+        try (Producer<String, String> producer = new KafkaProducer<>(props)) {
+            for (int i = 0; i < 2; i++) {
+                producer.send(new ProducerRecord<>("wrp-journal", Integer.toString(i), "eyJ1c3VhcmlvSWQiOiIyIiwiZmVjaGEiOiIyMDE4LTAzLTAxVDA2OjAwOjAwLjAwMFoiLCJhY2Npb24iOiJhY2Npb24gMSIsImlwQ2xpZW50ZSI6IjE5Mi4xNjguMTIuNDUiLCJzaXN0ZW1hT3AiOiJMaW51eCAzLjE0LjEyIiwiZGF0YSI6eyJrMSI6InYxIiwiazIiOiJ2MiIsImszIjoidjMifX0="));
+                producer.send(new ProducerRecord<>("wrp-audit", Integer.toString(i), "eyJ0aXBvIjoiTUFJTF9QTEFJTiIsImRlc3Rpbm8iOiJ1Ymc3MDBAZ21haWwuY29tIiwibWVuc2FqZSI6IjxodG1sPk1lbnNhamUgZGUgaHRtbDwvaHRtbD4ifQ=="));
+                producer.send(new ProducerRecord<>("wrp-audit", Integer.toString(i), "ew0KICAidGlwbyI6ICJIVE1MX01BSUwiLA0KICAiZGVzdGlubyI6ICJ1Ymc3MDBAZ21haWwuY29tIiwNCiAgIm1lbnNhamUiOiAiPGh0bWw+PGgxPllvdSBjYW4gZWRpdCB0aGlzIGRlbW8gdGV4dCE8L2gxPlxyXG48aDI+SG93IHRvIHVzZSB0aGUgZWRpdG9yOjwvaDI+XHJcbjxwPlBhc3RlIHlvdXIgZG9jdW1lbnRzIGluIHRoZSB2aXN1YWwgZWRpdG9yIG9uIHRoZSBsZWZ0IG9yIHlvdXIgSFRNTCBjb2RlIGluIHRoZSBzb3VyY2UgZWRpdG9yIGluIHRoZSByaWdodC4gPGJyIC8+RWRpdCBhbnkgb2YgdGhlIHR3byBhcmVhcyBhbmQgc2VlIHRoZSBvdGhlciBjaGFuZ2luZyBpbiByZWFsIHRpbWUuJm5ic3A7PC9wPlxyXG48cD5DbGljayB0aGUgQ2xlYW4gYnV0dG9uIHRvIGNsZWFuIHlvdXIgc291cmNlIGNvZGUuPC9wPlxyXG48aDI+U29tZSB1c2VmdWwgZmVhdHVyZXM6PC9oMj5cclxuPG9sPlxyXG48bGk+PGltZyBzcmM9J2h0dHBzOi8vaHRtbC1vbmxpbmUuY29tL2ltZy8wMS1pbnRlcmFjdGl2ZS1jb25uZWN0aW9uLnBuZycgYWx0PSdpbnRlcmFjdGl2ZSBjb25uZWN0aW9uJyB3aWR0aD0nNDUnIC8+IEludGVyYWN0aXZlIHNvdXJjZSBlZGl0b3I8L2xpPlxyXG48bGk+PGltZyBzcmM9J2h0dHBzOi8vaHRtbC1vbmxpbmUuY29tL2ltZy8wMi1odG1sLWNsZWFuLnBuZycgYWx0PSdodG1sIGNsZWFuZXInIHdpZHRoPSc0NScgLz4gSFRNTCBDbGVhbmluZzwvbGk+XHJcbjxsaT48aW1nIHNyYz0naHR0cHM6Ly9odG1sLW9ubGluZS5jb20vaW1nLzAzLWRvY3MtdG8taHRtbC5wbmcnIGFsdD0nV29yZCB0byBodG1sJyB3aWR0aD0nNDUnIC8+IFdvcmQgdG8gSFRNTCBjb252ZXJzaW9uPC9saT5cclxuPGxpPjxpbWcgc3JjPSdodHRwczovL2h0bWwtb25saW5lLmNvbS9pbWcvMDQtcmVwbGFjZS5wbmcnIGFsdD0ncmVwbGFjZSB0ZXh0JyB3aWR0aD0nNDUnIC8+IEZpbmQgYW5kIFJlcGxhY2U8L2xpPlxyXG48bGk+PGltZyBzcmM9J2h0dHBzOi8vaHRtbC1vbmxpbmUuY29tL2ltZy8wNS1naWJiZXJpc2gucG5nJyBhbHQ9J2dpYmJlcmlzaCcgd2lkdGg9JzQ1JyAvPiBMb3JlbS1JcHN1bSBnZW5lcmF0b3I8L2xpPlxyXG48bGk+PGltZyBzcmM9J2h0dHBzOi8vaHRtbC1vbmxpbmUuY29tL2ltZy82LXRhYmxlLWRpdi1odG1sLnBuZycgYWx0PSdodG1sIHRhYmxlIGRpdicgd2lkdGg9JzQ1JyAvPiBUYWJsZSB0byBESVYgY29udmVyc2lvbjwvbGk+XHJcbjwvb2w+XHJcbjxoMj5DbGVhbmluZyBvcHRpb25zOjwvaDI+XHJcbjx0YWJsZT5cclxuPHRoZWFkPlxyXG48dHI+XHJcbjx0ZD5OYW1lIG9mIHRoZSBmZWF0dXJlPC90ZD5cclxuPHRkPkV4YW1wbGU8L3RkPlxyXG48dGQ+RGVmYXVsdDwvdGQ+XHJcbjwvdHI+XHJcbjwvdGhlYWQ+XHJcbjx0Ym9keT5cclxuPHRyPlxyXG48dGQ+UmVtb3ZlIHRhZyBhdHRyaWJ1dGVzPC90ZD5cclxuPHRkPjxpbWcgc3JjPSdpbWFnZXMvc21pbGV5LnBuZycgYWx0PSdsYXVnaGluZycgd2lkdGg9JzQwJyBoZWlnaHQ9JzE2JyAvPiAoZXhjZXB0IDxzdHJvbmc+aW1nPC9zdHJvbmc+LTxlbT5zcmM8L2VtPiBhbmQgPHN0cm9uZz5hPC9zdHJvbmc+LTxlbT5ocmVmPC9lbT4pPC90ZD5cclxuPC90cj5cclxuPHRyPlxyXG48dGQ+UmVtb3ZlIGlubGluZSBzdHlsZXM8L3RkPlxyXG48dGQ+WW91IDxzdHJvbmc+c2hvdWxkIG5ldmVyPC9zdHJvbmc+Jm5ic3A7dXNlIGlubGluZSBzdHlsZXMhPC90ZD5cclxuPHRkPjxzdHJvbmc+eDwvc3Ryb25nPjwvdGQ+XHJcbjwvdHI+XHJcbjx0cj5cclxuPHRkPlJlbW92ZSBjbGFzc2VzIGFuZCBJRHM8L3RkPlxyXG48dGQ+VXNlIGNsYXNzZXMgdG8gPHN0cm9uZz5zdHlsZSBldmVyeXRoaW5nPC9zdHJvbmc+LjwvdGQ+XHJcbjx0ZD48c3Ryb25nPng8L3N0cm9uZz48L3RkPlxyXG48L3RyPlxyXG48dHI+XHJcbjx0ZD5SZW1vdmUgYWxsIHRhZ3M8L3RkPlxyXG48dGQ+VGhpcyBsZWF2ZXMgPHN0cm9uZz5vbmx5IHRoZSBwbGFpbjwvc3Ryb25nPiA8ZW0+dGV4dDwvZW0+LiA8aW1nIHNyYz0naW1hZ2VzL3NtaWxleS5wbmcnIGFsdD0nbGF1Z2hpbmcnIHdpZHRoPScxNicgaGVpZ2h0PScxNicgLz48L3RkPlxyXG48L3RyPlxyXG48dHI+XHJcbjx0ZD5SZW1vdmUgc3VjY2Vzc2l2ZSAmYW1wO25ic3A7czwvdGQ+XHJcbjx0ZD5OZXZlciB1c2Ugbm9uLWJyZWFraW5nIHNwYWNlcyB0byBzZXQgbWFyZ2lucy48L3RkPlxyXG48dGQ+PHN0cm9uZz54PC9zdHJvbmc+PC90ZD5cclxuPC90cj5cclxuPHRyPlxyXG48dGQ+UmVtb3ZlIGVtcHR5IHRhZ3M8L3RkPlxyXG48dGQ+RW1wdHkgdGFncyBzaG91bGQgZ28hPC90ZD5cclxuPC90cj5cclxuPHRyPlxyXG48dGQ+UmVtb3ZlIHRhZ3Mgd2l0aCBvbmUgJmFtcDtuYnNwOzwvdGQ+XHJcbjx0ZD5UaGlzIG1ha2VzJm5ic3A7bm8gc2Vuc2UhPC90ZD5cclxuPHRkPjxzdHJvbmc+eDwvc3Ryb25nPjwvdGQ+XHJcbjwvdHI+XHJcbjx0cj5cclxuPHRkPlJlbW92ZSBzcGFuIHRhZ3M8L3RkPlxyXG48dGQ+U3BhbiB0YWdzIHdpdGggYWxsIHN0eWxlczwvdGQ+XHJcbjx0ZD48c3Ryb25nPng8L3N0cm9uZz48L3RkPlxyXG48L3RyPlxyXG48dHI+XHJcbjx0ZD5SZW1vdmUgaW1hZ2VzPC90ZD5cclxuPHRkPkkgYW0gYW4gaW1hZ2U6IDxpbWcgc3JjPSdpbWFnZXMvc21pbGV5LnBuZycgYWx0PSdsYXVnaGluZycgLz48L3RkPlxyXG48L3RyPlxyXG48dHI+XHJcbjx0ZD5SZW1vdmUgbGlua3M8L3RkPlxyXG48dGQ+PGEgaHJlZj0naHR0cHM6Ly9odG1sLW9ubGluZS5jb20nPlRoaXMgaXM8L2E+IGEgbGluay48L3RkPlxyXG48L3RyPlxyXG48dHI+XHJcbjx0ZD5SZW1vdmUgdGFibGVzPC90ZD5cclxuPHRkPlRha2VzIGV2ZXJ5dGhpbmcgb3V0IG9mIHRoZSB0YWJsZS48L3RkPlxyXG48L3RyPlxyXG48dHI+XHJcbjx0ZD5SZXBsYWNlIHRhYmxlIHRhZ3Mgd2l0aCBzdHJ1Y3R1cmVkIGRpdnM8L3RkPlxyXG48dGQ+VGhpcyB0ZXh0IGlzIGluc2lkZSBhIHRhYmxlLjwvdGQ+XHJcbjwvdHI+XHJcbjx0cj5cclxuPHRkPlJlbW92ZSBjb21tZW50czwvdGQ+XHJcbjx0ZD5UaGlzIGlzIG9ubHkgdmlzaWJsZSBpbiB0aGUgc291cmNlIGVkaXRvcjwvdGQ+XHJcbjx0ZD48c3Ryb25nPng8L3N0cm9uZz48L3RkPlxyXG48L3RyPlxyXG48dHI+XHJcbjx0ZD5FbmNvZGUgc3BlY2lhbCBjaGFyYWN0ZXJzPC90ZD5cclxuPHRkPiZoZWFydHM7IDxzdHJvbmc+4pi6IOKYhTwvc3Ryb25nPiAmZ3Q7Jmx0OzwvdGQ+XHJcbjx0ZD48c3Ryb25nPng8L3N0cm9uZz48L3RkPlxyXG48L3RyPlxyXG48dHI+XHJcbjx0ZD5TZXQgbmV3IGxpbmVzIGFuZCB0ZXh0IGluZGVudHM8L3RkPlxyXG48dGQ+T3JnYW5pemUgdGhlIHRhZ3MgaW4gYSBuaWNlIHRyZWUgdmlldy48L3RkPlxyXG48L3RyPlxyXG48L3Rib2R5PlxyXG48L3RhYmxlPlxyXG48cD48c3Ryb25nPlNhdmUgdGhpcyBsaW5rIGludG8geW91ciBib29rbWFya3MgYW5kIHNoYXJlIGl0IHdpdGggeW91ciBmcmllbmRzLiBJdCBpcyBhbGwgRlJFRSEgPC9zdHJvbmc+PGJyIC8+PHN0cm9uZz5FbmpveSE8L3N0cm9uZz48L3A8L2h0bWw+Ig0KfQ=="));
+            }
         }
-//        ExecutorService executor = Executors.newFixedThreadPool(2);
-//        Thread t1 = new Thread(() -> {
-//            while (true) {
-//                for (int i = 0; i < 20; i++) {
-//                    producer.send(new ProducerRecord<>("my-topic", Integer.toString(i) + "-" + Thread.currentThread().getName(), Integer.toString(i)));
-//                }
-//            }
-//        }, "t1");
-//        Thread t2 = new Thread(() -> {
-//            while (true) {
-//                for (int i = 0; i < 20; i++) {
-//                    producer.send(new ProducerRecord<>("my-topic", Integer.toString(i) + "-" + Thread.currentThread().getName(), Integer.toString(i)));
-//                }
-//            }
-//        }, "t2");
-//
-//        executor.execute(t1);
-//        executor.execute(t2);
-//
-//        executor.shutdown();
-
-        producer.close();
     }
 }

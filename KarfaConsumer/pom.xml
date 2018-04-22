@@ -33,6 +33,13 @@
             <artifactId>mongojack</artifactId>
             <version>2.8.2</version>
         </dependency>
+        
+        <!-- APACHE commons - EMAIL--> 
+        <dependency> 
+            <groupId>org.apache.commons</groupId> 
+            <artifactId>commons-email</artifactId> 
+            <version>1.5</version> 
+        </dependency>   
     </dependencies>
     
     <build>
@@ -74,7 +81,7 @@
                     <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                         <manifest>
-                            <mainClass>wrp.kafkaconsumer.MyConsumer</mainClass>
+                            <mainClass>wrp.kafkaconsumer.Main</mainClass>
                         </manifest>
                     </archive>
 
